@@ -1,0 +1,125 @@
+data Ord key => BSTree key value = Leaf | Branch key value (BSTree key value) (BSTree key value)
+                                   deriving (Show)
+static class Node<T1, T2> {
+        T1 key;
+        T2 value;
+         Node<T1, T2> left, right;
+       
+        Node(T1 key, T2 value) {
+                this.key = key;
+                this.value = value;
+        }
+}
+get :: Ord key => BSTree key value -> key -> Maybe value
+get Leaf _ = Nothing
+get (Branch key value left right) k
+    | k < key  = get left k
+    | k > key  = get right k
+    | k == key = Just value
+public T2 get(T1 k) {
+        Node<T1, T2> x = root;
+        while (x != null) {
+                int cmp = k.compareTo(x.key);
+                if (cmp == 0) {
+                        return x.value;
+                }
+                if (cmp < 0) {
+                        x = x.left;
+                } else {
+                        x = x.right;
+                }
+        }
+        return null;
+}
+add :: Ord key => BSTree key value -> key -> value -> BSTree key value
+add Leaf k v = Branch k v Leaf Leaf
+add (Branch key value left right) k v
+    | k < key  = Branch key value (add left k v) right
+    | k > key  = Branch key value left (add right k v)
+    | k == key = Branch key value left right
+public void add(T1 k, T2 v) {
+        Node<T1, T2> x = root, y = null;
+        while (x != null) {
+                int cmp = k.compareTo(x.key);
+                if (cmp == 0) {
+                        x.value = v;
+                        return;
+                } else {
+                        y = x;
+                        if (cmp < 0) {
+                                x = x.left;
+                        } else {
+                                x = x.right;
+                        }
+                }
+        }
+        Node<T1, T2> newNode = new Node<T1, T2>(k, v);
+        if (y == null) {
+                root = newNode;
+        } else {
+                if (k.compareTo(y.key) < 0) {
+                        y.left = newNode;
+                } else {
+                        y.right = newNode;
+                }
+        }
+}
+remove :: Ord key => BSTree key value -> key -> BSTree key value
+remove Leaf _ = Leaf
+remove (Branch key value left right) k
+    | k < key  = Branch key value (remove left k) right
+    | k > key  = Branch key value left (remove right k)
+    | k == key = if isLeaf right
+                 then left
+                 else Branch leftmostA leftmostB left right'
+                     where
+                       isLeaf Leaf = True
+                       isLeaf _    = False
+                       ((leftmostA, leftmostB), right') = deleteLeftmost right
+                       deleteLeftmost (Branch key value Leaf right) = ((key, value), right)
+                       deleteLeftmost (Branch key value left right) = (pair, Branch key value left' right)
+                           where (pair, left') = deleteLeftmost left
+public void remove(T1 k) {
+        Node<T1, T2> x = root, y = null;
+        while (x != null) {
+                int cmp = k.compareTo(x.key);
+                if (cmp == 0) {
+                        break;
+                } else {
+                        y = x;
+                        if (cmp < 0) {
+                                x = x.left;
+                        } else {
+                                x = x.right;
+                        }
+                }
+        }
+        if (x == null) {
+                return;
+        }
+        if (x.right == null) {
+                if (y == null) {
+                        root = x.left;
+                } else {
+                        if (x == y.left) {
+                                y.left = x.left;
+                        } else {
+                                y.right = x.left;
+                        }
+                }
+        } else {
+                Node<T1, T2> leftMost = x.right;
+                y = null;
+                while (leftMost.left != null) {
+                        y = leftMost;
+                        leftMost = leftMost.left;
+                }
+                if (y != null) {
+                        y.left = leftMost.right;
+                } else {
+                        x.right = leftMost.right;
+                }
+                x.key = leftMost.key;
+                x.value = leftMost.value;
+        }
+}
